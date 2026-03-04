@@ -16,9 +16,9 @@ on:
         required: true
         type: string
     secrets:
-      npm_token:
+      NPM_GITHUB_TOKEN:
         required: false
-        description: Token for GitHub Packages (use NPM_GITHUB_TOKEN for cross-repo packages)
+        description: Token for GitHub Packages (cross-repo private packages)
 
 jobs:
   deploy:
@@ -40,7 +40,7 @@ jobs:
 
       - name: Configure npm for GitHub Packages
         env:
-          NPM_AUTH_TOKEN: ${{ secrets.npm_token || secrets.GITHUB_TOKEN }}
+          NPM_AUTH_TOKEN: ${{ secrets.NPM_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
         run: echo "//npm.pkg.github.com/:_authToken=$NPM_AUTH_TOKEN" >> .npmrc
 
       - name: Install dependencies
