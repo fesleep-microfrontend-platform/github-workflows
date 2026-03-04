@@ -12,6 +12,11 @@ on:
       app_name:
         required: true
         type: string
+      dist_subfolder:
+        required: false
+        type: string
+        default: "browser"
+        description: "Subfolder under dist/app_name (e.g. browser for Angular app builder)"
       role_arn:
         required: true
         type: string
@@ -57,13 +62,13 @@ jobs:
 
       - name: Upload static assets (long cache)
         run: |
-          aws s3 sync dist/${{ inputs.app_name }} s3://${{ inputs.bucket_name }} \
+          aws s3 sync dist/${{ inputs.app_name }}/${{ inputs.dist_subfolder }} s3://${{ inputs.bucket_name }} \
             --delete \
             --exclude "index.html" \
             --cache-control "public,max-age=31536000,immutable"
 
       - name: Upload index.html (no cache)
         run: |
-          aws s3 cp dist/${{ inputs.app_name }}/index.html \
+          aws s3 cp dist/${{ inputs.app_name }}/${{ inputs.dist_subfolder }}/index.html \
             s3://${{ inputs.bucket_name }}/index.html \
             --cache-control "no-cache"
