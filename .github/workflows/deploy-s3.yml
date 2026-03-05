@@ -28,11 +28,6 @@ on:
       role_arn:
         required: true
         type: string
-      debug_npm_token:
-        required: false
-        type: string
-        default: "false"
-        description: "Set to 'true' to log whether NPM token is present (length only, never the value)"
     secrets:
       NPM_GITHUB_TOKEN:
         required: false
@@ -55,21 +50,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          registry-url: 'https://npm.pkg.github.com'
-          scope: '@fesleep-microfrontend-platform'
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
 
-      - name: Debug NPM token (when debug_npm_token is true)
-        if: inputs.debug_npm_token == 'true'
+      - name: Configure npm for GitHub Packages
         env:
           NPM_AUTH_TOKEN: ${{ secrets.NPM_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
-        run: |
-          if [ -n "$NPM_AUTH_TOKEN" ]; then
-            echo "NPM token: present (length ${#NPM_AUTH_TOKEN} chars)"
-          else
-            echo "NPM token: NOT present - npm install will likely get 401 for private packages"
-          fi
+        run: echo "//npm.pkg.github.com/:_authToken=$NPM_AUTH_TOKEN" >> .npmrc
 
       - name: Install dependencies
         run: npm ci
