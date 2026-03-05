@@ -55,6 +55,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@fesleep-microfrontend-platform'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Debug NPM token (when debug_npm_token is true)
         if: inputs.debug_npm_token == 'true'
@@ -66,11 +70,6 @@ jobs:
           else
             echo "NPM token: NOT present - npm install will likely get 401 for private packages"
           fi
-
-      - name: Configure npm for GitHub Packages
-        env:
-          NPM_AUTH_TOKEN: ${{ secrets.NPM_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
-        run: echo "//npm.pkg.github.com/:_authToken=$NPM_AUTH_TOKEN" >> .npmrc
 
       - name: Install dependencies
         run: npm ci
