@@ -17,6 +17,14 @@ on:
         type: string
         default: "browser"
         description: "Subfolder under dist/app_name (e.g. browser for Angular app builder)"
+      contact_remote_url:
+        required: false
+        type: string
+        description: "Production URL for contact remote (vars.CONTACT_REMOTE_URL); used to generate environment.prod.ts"
+      dashboard_remote_url:
+        required: false
+        type: string
+        description: "Production URL for dashboard remote (vars.DASHBOARD_REMOTE_URL); used to generate environment.prod.ts"
       role_arn:
         required: true
         type: string
@@ -50,6 +58,28 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Ensure production environment file exists
+        env:
+          CONTACT_URL: ${{ inputs.contact_remote_url }}
+          DASHBOARD_URL: ${{ inputs.dashboard_remote_url }}
+        run: |
+          if [ ! -f src/environments/environment.prod.ts ] && [ -f src/environments/environment.prod.sample.ts ]; then
+            if [ -n "$CONTACT_URL" ] && [ -n "$DASHBOARD_URL" ]; then
+              mkdir -p src/environments
+              cat > src/environments/environment.prod.ts << ENVEOF
+          export const environment = {
+            production: true,
+            federation: {
+              contact: '$CONTACT_URL',
+              dashboard: '$DASHBOARD_URL',
+            },
+          } as const;
+          ENVEOF
+            else
+              cp src/environments/environment.prod.sample.ts src/environments/environment.prod.ts
+            fi
+          fi
 
       - name: Build production
         run: npm run build -- --configuration=production
